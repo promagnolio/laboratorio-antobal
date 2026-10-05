@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Antobal - Panel Controlable</title>
+    
+    <style>
+        /* ESTILOS BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            background-color: #004d40;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header .logo h1 {
+            font-size: 1.5rem;
+        }
+
+        header .logo p {
+            font-size: 0.8rem;
+            color: #b2dfdb;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #80cbc4;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0,77,64,0.85), rgba(0,77,64,0.85)), url('https://unsplash.com');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 6rem 1rem;
+        }
+
+        .hero h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .container h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #004d40;
+        }
+
+        .results-section {
+            background-color: #e0f2f1;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .search-box {
+            margin: 1.5rem auto;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            max-width: 500px;
+        }
+
+        .search-box input {
+            padding: 0.7rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+            width: 100%;
+        }
+
+        .search-box button {
+            padding: 0.7rem 1.5rem;
+            background-color: #004d40;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .result-display {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            display: none;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+
+        footer {
+            background-color: #263238;
+            color: #eceff1;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <h1>Laboratorio Antobal</h1>
+            <p>Salud y Diagnóstico Preciso</p>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#resultados">Resultados en Línea</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="inicio" class="hero">
+        <h2>Panel de Pacientes en Tiempo Real</h2>
+        <p>Administra los estados de tus exámenes directamente desde tu hoja de cálculo habitual.</p>
+    </section>
+
+    <section id="resultados" class="results-section">
+        <div class="container" style="margin: 0 auto;">
+            <h2>Consulta de Resultados</h2>
+            <p>Introduce tu código de paciente:</p>
+            <div class="search-box">
+                <input type="text" id="codigoPaciente" placeholder="Ingresa el código registrado">
+                <button onclick="consultarResultadoReal()">Buscar Examen</button>
+            </div>
+            <div id="resultadoDisplay" class="result-display"></div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Laboratorio Antobal. Sistema autoadministrable.</p>
+    </footer>
+
+    <!-- LOGICA CONECTADA A TU PANEL DE CONTROL (GOOGLE SHEETS) -->
+    <script>
+        // ⚠️ REEMPLAZA ESTE ENLACE POR TU PROPIO LINK .CSV DE GOOGLE SHEETS
+        const URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDwAjqzND6ezgzlqK35mrV8BTtXlF8xiF_Bca4WTT2pKHmMSj66hL1Vj2ywywcn6Sm3gZJ2doESzha/pub?gid=0&single=true&output=csv";
+
+        async function consultarResultadoReal() {
+            const codigoBuscado = document.getElementById('codigoPaciente').value.trim().toUpperCase();
+            const display = document.getElementById('resultadoDisplay');
+
+            if (!codigoBuscado) {
+                display.style.display = 'block';
+                display.style.color = '#c62828';
+                display.textContent = 'Por favor, ingresa un código.';
+                return;
+            }
+
+            display.style.display = 'block';
+            display.style.color = '#333';
+            display.textContent = 'Buscando en la base de datos...';
+
+            try {
+                // Hacemos la consulta en vivo a tu Google Sheets
+                const response = await fetch(URL_GOOGLE_SHEETS);
+                const dataText = await response.text();
+                
+                // Procesamos las filas del archivo CSV
+                const filas = dataText.split("\n");
+                let pacienteEncontrado = null;
+
+                for (let i = 1; i < filas.length; i++) {
+                    const columnas = filas[i].split(",");
+                    if (columnas[0] && columnas[0].trim().toUpperCase() === codigoBuscado) {
+                        pacienteEncontrado = {
+                            codigo: columnas[0].trim(),
+                            examen: columnas[1] ? columnas[1].trim() : 'No especificado',
+                            fecha: columnas[2] ? columnas[2].trim() : 'No especificada',
+                            estado: columnas[3] ? columnas[3].trim() : 'En proceso'
+                        };
+                        break;
+                    }
+                }
+
+                if (pacienteEncontrado) {
+                    const esCompletado = pacienteEncontrado.estado.toLowerCase() === "completado";
+                    const colorEstado = esCompletado ? '#2e7d32' : '#e65100';
+
+                    display.innerHTML = `
+                        <p style="color: ${colorEstado}; font-size:1.2rem; margin-bottom:0.5rem;">
+                            <strong>Estado: ${pacienteEncontrado.estado}</strong>
+                        </p>
+                        <p><strong>Código de Paciente:</strong> ${pacienteEncontrado.codigo}</p>
+                        <p><strong>Estudio Clínico:</strong> ${pacienteEncontrado.examen}</p>
+                        <p><strong>Fecha de Ingreso:</strong> ${pacienteEncontrado.fecha}</p>
+                        ${esCompletado ? '<p style="margin-top:1rem;"><a href="#" style="color:#00897b; font-weight:bold;">📥 Descargar Reporte Clínico</a></p>' : '<p style="color:#666; font-size:0.9rem; margin-top:0.5rem;">⏱ Tu muestra está en procesamiento.</p>'}
+                    `;
+                } else {
+                    display.style.color = '#c62828';
+                    display.textContent = 'El código ingresado no existe en nuestro sistema.';
+                }
+
+            } catch (error) {
+                console.error(error);
+                display.style.color = '#c62828';
+                display.textContent = 'Error al conectar con la base de datos de administración. Verifica la configuración de tu Google Sheets.';
+            }
+        }
+    </script>
+</body>
+</html>
